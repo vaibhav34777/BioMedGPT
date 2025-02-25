@@ -53,7 +53,7 @@ Prevented overfitting by tuning dropout and weight decay values.
 
 Used Fused AdamW optimizer for better efficiency.
 
-### Training Results
+#### Training Results
 
 Train Loss per Epoch:
 
@@ -63,7 +63,7 @@ Epoch 3: <train_loss>
 Epoch 4: <train_loss>
 Epoch 5: <train_loss>
 
-### Validation Loss per Epoch:
+#### Validation Loss per Epoch:
 
 Epoch 1: <val_loss>
 Epoch 2: <val_loss>
