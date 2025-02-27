@@ -239,7 +239,7 @@ assert total_batch_size%(B*T)==0
 grad_accum_steps=total_batch_size//(B*T)
 print(f'grad_accum_steps {grad_accum_steps}')
 max_lr=1e-5
-min_lr=0.1*max_lr
+min_lr=0.01*max_lr
 max_steps=274
 warm_up=10
 def get_lr(it):
