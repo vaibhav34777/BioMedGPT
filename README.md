@@ -57,19 +57,19 @@ Used Fused AdamW optimizer for better efficiency.
 
 Train Loss per Epoch:
 
-Epoch 1: 4.21
-Epoch 2: 4.16
-Epoch 3: 4.15
-Epoch 4: 4.11
-Epoch 5: 4.08
+Epoch 1: <4.21>
+Epoch 2: <4.16>
+Epoch 3: <4.15>
+Epoch 4: <4.11>
+Epoch 5: <4.08>
 
 #### Validation Loss per Epoch:
 
-Epoch 1: 5.51
-Epoch 2: 5.50
-Epoch 3: 5.47
-Epoch 4: 5.51
-Epoch 5: 5.49
+Epoch 1: <5.51>
+Epoch 2: <5.50>
+Epoch 3: <5.47>
+Epoch 4: <5.51>
+Epoch 5: <5.49>
 
 ### Model Performance & Observations
 
