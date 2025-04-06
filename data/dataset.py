@@ -21,11 +21,6 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 t5_model.to(device)
 
 def paraphrase_batch(examples, max_length=128):
-    """
-    Processes a batch of examples:
-      - For each question in the batch, run T5 in batch mode to paraphrase it.
-      - Then format the QA pair (original + paraphrased version) into a single string.
-    """
     # Extract questions and long answers from the batch
     questions = examples["question"]
     long_answers = examples["long_answer"]
