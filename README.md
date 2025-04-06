@@ -1,130 +1,119 @@
 # BioMedGPT
-### Project Overview
+BioMedGPT is a fine-tuned GPT-2 Medium model built from scratch in PyTorch and tailored for biomedical question answering. The project leverages a large-scale, domain-specific dataset and advanced data augmentation techniques, including paraphrasing of questions using T5. The resulting model is capable of answering complex biomedical queries with improved accuracy and context-awareness.
 
-This project involves fine-tuning the GPT-2 (124M) model on the PubMedQA dataset. The model was implemented from scratch in PyTorch, and pre-trained GPT-2 weights were loaded before fine-tuning. The dataset was formatted into a question-answer format and contains approximately 50 million characters. The fine-tuning process was optimized using various strategies to improve performance and prevent overfitting.
+### Overview
+BioMedGPT is designed to address the unique challenges of biomedical question answering by fine-tuning a GPT-2 Medium model on a dataset of approximately 200,000 QA pairs containing around 30 million tokens (as measured by the GPT-2 tokenizer). By incorporating paraphrasing-based data augmentation, the model learns to handle various formulations of biomedical questions while preserving the integrity of the answers.
 
-### Dataset
+### Features
+#### Custom Model Architecture:
+The model is implemented from scratch in PyTorch, with weights later loaded from the Hugging Face GPT-2 model, allowing for extensive customization and transparency.
 
- Source: PubMedQA dataset from Hugging Face.
+#### Domain-Specific Fine-Tuning:
+Fine-tuned on a biomedical QA dataset (99:1 train-validation split) containing ~200K pairs and ~30 million tokens.
 
- Format: Question-Answer pairs.
+#### Data Augmentation with Paraphrasing:
+Utilizes T5 to paraphrase each question once, thereby increasing input variability while maintaining answer accuracy.
 
- Size: ~50 million characters.
+#### Robust Regularization:
+A dropout rate of 0.3 and a weight decay of 0.3 are used during training to reduce overfitting.
 
- Train/Validation Split: 98:2 ratio.
+#### Optimized Training Regime:
+The learning rate starts at 1e-6 and is scheduled to decay cosinely to 1e-7. For the second epoch, the minimum learning rate is maintained throughout, as the model is trained for a total of 2 epochs.
 
-### Model Implementation
 
- Base Model: GPT-2 (124M) written from scratch in PyTorch.
 
- Preprocessing: Used tiktoken GPT-2 tokenizer.
+### Installation and Setup
 
- Pretrained Weights: Loaded GPT-2 (124M) weights before fine-tuning.
+#### Clone the Repository:
+Clone the BioMedGPT repository from GitHub to your local machine.
 
-### Training Configuration
+#### Environment Setup:
+Create a Python virtual environment and install the required dependencies as listed in the below.
+###### pip install torch transformers datasets tiktoken huggingface-hub tqdm
 
-Batch Size: 16
+Data Access:
+You can run the dataset.py script to get the preprocessed qa dataset from hugging face.
 
-Block Size: 128
+### Data Preprocessing
+The data preprocessing pipeline:
 
-Gradient Accumulation Steps: 32
+- Loads the biomedical QA dataset.
 
-Epochs: 5
+- Applies T5-based paraphrasing to each question (keeping the answers intact).
 
-Steps per Epoch: 274
+- Generates both the original and paraphrased QA pairs.
 
-Learning Rate Scheduler:
+- Saves the formatted output to a text file for efficient loading during fine-tuning.
 
-10 warm-up steps.
+This step ensures that the model is exposed to multiple ways of asking the same question, improving its robustness and generalization.
 
-Cosine decay to 1% of the initial learning rate.
 
-Maximum learning rate: 1e-5 for slow training.
 
-### Optimization Techniques:
+### Model Architecture and Fine-Tuning
 
-Mixed precision training for memory efficiency on GPU.
+- #### Model Construction:
+The GPT-2 Medium model is written from scratch in PyTorch. After building the architecture, weights from a pretrained Hugging Face model are loaded into the custom model.
 
-Dropout: 0.6.
+- #### Fine-Tuning Strategy:
+Only the last 12 transformer blocks (out of 24) are trained, while the remaining blocks remain frozen. This strategy accelerates training and helps mitigate overfitting.
 
-Weight Decay: 0.3.
+- #### Regularization:
+A dropout rate of 0.3 is applied, and weight decay is set to 0.3 to further prevent overfitting.
 
-Prevented overfitting by tuning dropout and weight decay values.
 
-Used Fused AdamW optimizer for better efficiency.
 
-#### Training Results
+### Training Details
+- #### Batch Size
+  I have used a batch size of 16 and a block size of 128 while trainig but i was processing 65536 tokens in a step so i am using 32 gradient accumulation steps.
+- #### Learning Rate Schedule:
+The training starts with a learning rate of 1e-6, which decays using a cosine schedule to 1e-7. For the second epoch, the model continues training at the minimum learning rate.
 
-Train Loss per Epoch:
+- #### Epochs:
+The model is fine-tuned for 2 epochs.
 
-Epoch 1: <4.21>
-Epoch 2: <4.16>
-Epoch 3: <4.15>
-Epoch 4: <4.11>
-Epoch 5: <4.08>
+- #### Performance:
+The training process achieved a training loss of 2.26 and a validation loss of 3.24, indicating good learning and generalization on the biomedical QA task.
 
-#### Validation Loss per Epoch:
 
-Epoch 1: <5.51>
-Epoch 2: <5.50>
-Epoch 3: <5.47>
-Epoch 4: <5.51>
-Epoch 5: <5.49>
 
-### Model Performance & Observations
+### Evaluation
+Model evaluation involves both quantitative and qualitative analysis:
 
-The model is not generating perfect outputs and often hallucinates.
+- #### Loss Curve:
+Detailed training loss curves are available at output/loss.png.
 
-Due to the small model size, it struggles with reasoning in biomedical questions.
+- #### Example QA Comparisons:
+Side-by-side comparisons of the model’s answers against ideal answers for various biomedical questions in output/demo.ipynb
 
-The available computational resources limited the model's capacity for more complex fine-tuning.
+- #### Error Analysis:
+A discussion on observed hallucinations or inaccuracies.
+| **Question** | **Model Answer** | **Ideal Answer** | **Errors in Model Answer** |
+|--------------|------------------|------------------|-----------------------------|
+| **How does the renin-angiotensin-aldosterone system (RAAS) regulate blood pressure, and what are the implications of ACE inhibitors in its modulation?** | The RAAS increases systolic and diastolic pressures during arterial occlusion. Increased RAAS activity contributes to vascular resistance in hypertensive patients. Vasodilation may decrease RAAS activity, with nitric oxide influencing cytokine release. | RAAS regulates blood pressure by controlling fluid balance and blood vessel constriction. Renin converts angiotensinogen to angiotensin I, which becomes angiotensin II—a vasoconstrictor. ACE inhibitors block this conversion, lowering blood pressure and reducing heart strain. | Lacks key RAAS components like angiotensin II; introduces unrelated concepts like "plasma endothelial nitric oxide (VENO)"; vague and lacks therapeutic context of ACE inhibitors. |
+| **What role do cytochrome P450 enzymes play in drug metabolism?** | CYP2D6 contributes to P450 activity in drug metabolism, affecting enzyme activation and degradation. It is linked to p53 depletion and elevated P450s activity in liver and lymph. | Cytochrome P450 enzymes metabolize drugs by oxidizing them, affecting drug efficacy and toxicity. CYP2D6, CYP3A4, and others vary across individuals, influencing drug clearance and interactions. | Inaccurate claims about "p53 depletion" and irrelevant connections to lymph tissue; lacks clarity on drug oxidation and interindividual variability. |
+| **How does CRISPR-Cas9 technology enable genome editing?** | CRISPR-Cas9 targets genome regions in immune cells to deliver DNA outside the body. It creates functional immune cells that recognize pathogens, leading to novel therapies. | CRISPR-Cas9 uses a guide RNA to locate a DNA sequence and the Cas9 enzyme to cut it. This enables precise gene edits, allowing corrections, deletions, or insertions for research or therapy. | Misrepresents the core CRISPR mechanism; mentions "immune cells" and "DNA delivery outside the body," which are not central to CRISPR-Cas9’s function. |
 
-The learning rate scheduler helped in stable convergence.
 
-Mixed precision reduced memory usage without affecting performance.
+### Kaggle Notebook
 
-Proper dropout and weight decay settings prevented overfitting observed in earlier experiments.
+For detailed insights into the training process, including loss curves and training details, please refer to the Kaggle Notebook:
+[https://www.kaggle.com/code/vaibhav1908/biomedgpt]
 
-Fused AdamW optimizer improved training efficiency.
-
-### Sample Outputs
-
-#### Input:
-
-Question: Is myocardial infarct-sparing effect of adenosine A2A receptor activation due to its action on CD4+ T lymphocytes
-?
-
-#### Generated Output:
-
-Answer: In humans, the presence of AD2A2A overexpression in peripheral cells may contribute to the pathogenesis of the disease pathogenesis, suggesting that the absence of elevated levels, characterized by systemic immune cells, may significantly contribute to the pathogenesis of AD2A2A activity. Our results provide the support for an association between AD2A-induced hyperkinocell death of patients with elevated mortality, elevated CD4 expression, and increased hepatocell activation.
-
-#### Expected Output:
-
- Answer: In humans, the presence of AD2A2A overexpression in peripheral cells may contribute to the myocardial infarct-sparing effect of adenosine A2A receptor activation, suggesting that modulation of CD4+ T lymphocytes plays a critical role. Our observations indicate that elevated AD2A2A activity is associated with a reduction in hyperkinetic inflammatory responses mediated by CD4+ cells, which may lead to improved myocardial preservation. This association supports the notion that the cardioprotective effects observed with adenosine A2A receptor activation are at least partly due to its action on CD4+ T lymphocytes, highlighting a potential therapeutic pathway for reducing infarct-related damage.
-
-### Requirements
-
-To run this project, install the required dependencies:
-
-pip install torch transformers datasets tiktoken
-
-### Running the Training Script
-
-Execute the training script with:
-
-python train.py
+This notebook includes comprehensive details on data preprocessing, model training, and evaluation metrics.
 
 ### Future Improvements
 
-Experiment with different batch sizes and accumulation steps.
+- #### Enhanced Augmentation:
+Explore paraphrasing both questions and answers or integrating additional biomedical data sources.
 
-Test additional learning rate schedules.
+- #### Retrieval-Augmented Generation:
+Integrate domain-specific retrieval mechanisms to further reduce hallucinations.
 
-Evaluate model performance using different metrics.
+- #### Model Scaling:
+Investigate the impact of fine-tuning more transformer blocks or employing multi-GPU training setups.
 
-Explore further fine-tuning on domain-specific medical datasets.
-
-Consider using a larger model for improved reasoning capabilities.
+- #### Advanced Evaluation Metrics:
+Incorporate metrics like BLEU, ROUGE, or factuality scoring to quantitatively assess answer quality.
 
 ### Acknowledgments
 
@@ -134,4 +123,5 @@ Hugging Face for providing easy access to datasets and pre-trained models.
 
 PyTorch for enabling efficient model implementation and training.
 
-
+### License
+This project is licensed under the MIT License. See the LICENSE file for details.
