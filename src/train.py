@@ -11,15 +11,15 @@ import torch.utils
 import torch._dynamo
 torch._dynamo.config.suppress_errors = True
 
-dropout=0.6
+dropout=0.3
 
 @dataclass
 class GPTConfig:
-    n_embd : int = 768
-    n_layer : int =12
+    n_embd : int = 1024
+    n_layer : int =24
     block_size : int = 1024
     vocab_size : int =50304  # converting to a nice number
-    n_head : int = 12
+    n_head : int = 16
 
 class CausalSelfAttention(nn.Module):
     def __init__(self,config):
@@ -229,18 +229,22 @@ if torch.cuda.is_available():
 torch.set_float32_matmul_precision('high')
 scaler = torch.cuda.amp.GradScaler()
 # MODEL INTIALIZATION
-model=GPT.from_pretrained('gpt2')
+model=GPT.from_pretrained('gpt2-medium')
 model.to(device)
 model=torch.compile(model)
+# Freezibg first 12 transformer blocks out of 24
+for block in model.transformer.h[:12]:
+    for param in block.parameters():
+        param.requires_grad = False
 total_batch_size=65536
 B=16
 T=128
 assert total_batch_size%(B*T)==0
 grad_accum_steps=total_batch_size//(B*T)
 print(f'grad_accum_steps {grad_accum_steps}')
-max_lr=1e-5
+max_lr=1e-6
 min_lr=0.01*max_lr
-max_steps=274
+max_steps=548
 warm_up=10
 def get_lr(it):
     # warm up stage
@@ -264,7 +268,7 @@ val_step=20
 lossi,val_lossi=[],[]
 
 # TRAINING LOOP
-for step in range(max_steps*6):
+for step in range(max_steps*2):
     loss_accum=0
     t0=time.time()
     optimizer.zero_grad()
@@ -293,4 +297,4 @@ for step in range(max_steps*6):
         val_lossi.append(val_loss.item())
         print(f'validation loss at {step} : {val_loss.item():.4f}')
     if step%5==0:
-      print(f'step: {step} | loss: {loss_accum:.4f} | norm: {norm} | time: {dt:.4f} ms | tokens_per_sec={tokens_per_sec:.2f}')
+      print(f'step: {step} | loss: {loss_accum:.4f} | time: {dt:.4f} ms | tokens_per_sec={tokens_per_sec:.2f}')
