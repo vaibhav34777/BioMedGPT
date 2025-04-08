@@ -31,7 +31,8 @@ BioMedGPT is designed to address the unique challenges of biomedical question an
 
 - #### Environment Setup:
   Create a Python virtual environment and install the required dependencies as listed in the below.
-   ###### pip install torch transformers datasets tiktoken huggingface-hub tqdm
+  --- bash 
+   pip install torch transformers datasets tiktoken huggingface-hub tqdm
 
 - #### Data Access:
   You can run the dataset.py script to get the preprocessed qa dataset from hugging face.
