@@ -3,4 +3,3 @@ streamlit
 transformers
 tiktoken
 requests
-os
