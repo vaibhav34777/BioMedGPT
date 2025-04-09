@@ -1,11 +1,11 @@
 import streamlit as st
 import torch
+import requests
 from torch import nn
 import torch.nn.functional as F
 from dataclasses import dataclass
 import tiktoken
-import math
-from huggingface_hub import hf_hub_download
+import gdown
 
 # ---------------- Model Definition ---------------- #
 
@@ -108,11 +108,18 @@ class GPT(nn.Module):
         return logits, loss
 
 # ---------------- Load Model from Hugging Face ---------------- #
-checkpoint_path = hf_hub_download(repo_id="imvaibhavrana/bio-med-gpt", filename="checkpoint_step1050")
-checkpoint = torch.load(checkpoint_path, map_location=torch.device("cpu"))
-new_state_dict = {k.replace("_orig_mod.", ""): v for k, v in checkpoint.items()}
+def download_model():
+    model_path = "model/model.pth"
+    if not os.path.exists(model_path):
+        os.makedirs("model", exist_ok=True)
+        url = "https://huggingface.co/imvaibhavrana/bio-med-gpt/resolve/main/checkpoint_step1050"
+        response = requests.get(url)
+        with open(model_path, "wb") as f:
+            f.write(response.content)
+    return model_path
+model_file = download_model()
 model = GPT(GPTConfig())
-model.load_state_dict(new_state_dict, strict=False)
+model.load_state_dict(model_file, strict=False)
 model.eval()
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
