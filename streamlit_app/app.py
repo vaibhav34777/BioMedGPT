@@ -119,8 +119,9 @@ def download_model():
             f.write(response.content)
     return model_path
 model_file = download_model()
+checkpoint = torch.load(model_file, map_location=torch.device("cpu"))
 model = GPT(GPTConfig())
-model.load_state_dict(model_file, strict=False)
+model.load_state_dict(checkpoint, strict=False)
 model.eval()
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
