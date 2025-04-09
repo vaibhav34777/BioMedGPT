@@ -4,3 +4,4 @@ transformers
 tiktoken
 gdown
 requests
+os
