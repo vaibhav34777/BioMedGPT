@@ -108,7 +108,7 @@ class GPT(nn.Module):
         return logits, loss
 
 # ---------------- Load Model from Hugging Face ---------------- #
-checkpoint_path = hf_hub_download(repo_id="imvaibhavrana/bio-med-gpt", filename="checkpoint_step1050.pt")
+checkpoint_path = hf_hub_download(repo_id="imvaibhavrana/bio-med-gpt", filename="checkpoint_step1050")
 checkpoint = torch.load(checkpoint_path, map_location=torch.device("cpu"))
 new_state_dict = {k.replace("_orig_mod.", ""): v for k, v in checkpoint.items()}
 model = GPT(GPTConfig())
