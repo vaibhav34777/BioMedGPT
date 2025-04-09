@@ -2,4 +2,5 @@ torch
 streamlit
 transformers
 tiktoken
-huggingface-hub
+gdown
+requests
