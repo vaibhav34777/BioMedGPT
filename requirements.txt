@@ -1,6 +1,4 @@
 torch
-time
-math
 streamlit
 transformers
 tiktoken
