@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from dataclasses import dataclass
 import tiktoken
 import os
+os.environ["STREAMLIT_WATCHER_TYPE"] = "none"
 
 # ---------------- Model Definition ---------------- #
 
