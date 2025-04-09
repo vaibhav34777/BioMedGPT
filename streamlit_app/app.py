@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from dataclasses import dataclass
 import tiktoken
 import gdown
+import os
 
 # ---------------- Model Definition ---------------- #
 
