@@ -1,0 +1,7 @@
+torch
+time
+math
+streamlit
+transformers
+tiktoken
+huggingface-hub
