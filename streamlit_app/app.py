@@ -1,3 +1,6 @@
+import os
+os.environ["STREAMLIT_WATCHER_TYPE"] = "none"
+
 import streamlit as st
 import torch
 import requests
@@ -5,10 +8,6 @@ from torch import nn
 import torch.nn.functional as F
 from dataclasses import dataclass
 import tiktoken
-import os
-os.environ["STREAMLIT_WATCHER_TYPE"] = "none"
-
-# ---------------- Model Definition ---------------- #
 
 @dataclass
 class GPTConfig:
@@ -78,7 +77,7 @@ class GPT(nn.Module):
             ln_f = nn.LayerNorm(config.n_embd),
         ))
         self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
-        self.lm_head.weight = self.transformer.wte.weight  # weight sharing
+        self.lm_head.weight = self.transformer.wte.weight
         self.apply(self._init_weights)
 
     def _init_weights(self, module):
@@ -108,9 +107,8 @@ class GPT(nn.Module):
             loss = F.cross_entropy(logits.view(-1, self.config.vocab_size), targets.view(-1))
         return logits, loss
 
-# ---------------- Load Model from Hugging Face ---------------- #
 def download_model():
-    model_path = "model/model.pth"
+    model_path = "model/checkpoint_step1050"
     if not os.path.exists(model_path):
         os.makedirs("model", exist_ok=True)
         url = "https://huggingface.co/imvaibhavrana/bio-med-gpt/resolve/main/checkpoint_step1050"
@@ -118,26 +116,21 @@ def download_model():
         with open(model_path, "wb") as f:
             f.write(response.content)
     return model_path
+
 model_path = download_model()
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model = GPT(GPTConfig()).to(device)
 model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 model.eval()
 
-# ---------------- Inference Function ---------------- #
-
 def generate_text(prompt, max_tokens=128, topk=50):
-    # Prepend "Question:" and append "?" automatically.
     if not prompt.lower().startswith("question:"):
         prompt = "Question: " + prompt
     if not prompt.strip().endswith("?"):
         prompt = prompt.strip() + "?"
-    
-    # Use tiktoken GPT-2 encoding to tokenize input
     enc = tiktoken.get_encoding("gpt2")
     tokens = enc.encode(prompt)
     tokens = torch.tensor(tokens, dtype=torch.long).unsqueeze(0).to(device)
-    
     while tokens.shape[1] < max_tokens:
         with torch.no_grad():
             logits, _ = model(tokens)
@@ -149,15 +142,11 @@ def generate_text(prompt, max_tokens=128, topk=50):
             if next_token.item() == 50256:
                 break
             tokens = torch.cat((tokens, next_token), dim=1)
-    
     generated_text = enc.decode(tokens[0].tolist())
-    # Extract and return only the part after "Answer:"
     if "Answer:" in generated_text:
         return generated_text.split("Answer:")[-1].strip()
     else:
         return generated_text.strip()
-
-# ---------------- Streamlit App Layout ---------------- #
 
 st.set_page_config(page_title="BioMedGPT", page_icon="🤖", layout="wide")
 st.title("BioMedGPT – Biomedical Q&A Model")
