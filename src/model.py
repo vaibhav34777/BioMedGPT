@@ -100,4 +100,3 @@ class GPT(nn.Module):
             loss=F.cross_entropy(logits.view(-1,self.config.vocab_size),targets.view(-1))
         return logits,loss
 
-
