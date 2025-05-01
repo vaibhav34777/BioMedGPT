@@ -1,6 +1,13 @@
 import tiktoken
 import torch
 import torch.nn.functional as F
+from model import GPT
+
+checkpoint = torch.load('checkpoint_step1050', map_location='cpu')
+new_state_dict = {k.replace("_orig_mod.", ""): v for k, v in checkpoint.items()}
+model=GPT(GPTConfig())
+model.load_state_dict(new_state_dict, strict=False)
+
 num_sequence=1
 max_tokens=200
 enc=tiktoken.get_encoding('gpt2')
