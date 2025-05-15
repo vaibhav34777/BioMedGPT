@@ -9,7 +9,7 @@ model=GPT(GPTConfig())
 model.load_state_dict(new_state_dict, strict=False)
 
 num_sequence=1
-max_tokens=200
+max_tokens=125
 enc=tiktoken.get_encoding('gpt2')
 tokens=enc.encode("Question: Is myocardial infarct-sparing effect of adenosine A2A receptor activation due to its action on CD4+ T lymphocytes?")
 tokens=torch.tensor(tokens,dtype=torch.long)
