@@ -1,4 +1,6 @@
 # BioMedGPT
+![Alt text](demp-biomed.png)
+
 BioMedGPT is a fine-tuned GPT-2 Medium model built from scratch in PyTorch and tailored for biomedical question answering. The project leverages a large-scale, domain-specific dataset and advanced data augmentation techniques, including paraphrasing of questions using T5. The resulting model is capable of answering complex biomedical queries with improved accuracy and context-awareness.
 
 ### Overview
